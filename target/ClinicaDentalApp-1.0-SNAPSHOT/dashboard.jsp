@@ -1,79 +1,125 @@
-<%-- 
-    Document   : dashboard
-    Created on : 4 oct 2025, 23:02:43
-    Author     : Karen
---%>
-
 <%@page import="com.dental.app.clinicadentalapp.model.Usuario"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    // =================================================================
-    // ESTA ES LA PROTECCIÓN DE LA PÁGINA
-    // 1. Obtenemos el objeto 'usuario' de la sesión.
+    // Lógica para obtener el rol y la página a incluir (sin cambios)
     Usuario usuario = (Usuario) session.getAttribute("usuario");
-
-    // 2. Si el objeto es NULO, significa que nadie ha iniciado sesión.
     if (usuario == null) {
-        // 3. Lo redirigimos a la página de login y detenemos la carga de esta página.
-        response.sendRedirect("index.jsp");
+        response.sendRedirect("../index.jsp");
         return;
     }
-    // Si el objeto NO es nulo, el resto de la página se carga normalmente.
-    // =================================================================
+    String rol = usuario.getRol().getNombreRol();
+    String pageToInclude = request.getParameter("page");
+    if (pageToInclude == null || pageToInclude.trim().isEmpty()) {
+        pageToInclude = "inicio";
+    }
+    // Lógica de permisos (sin cambios)
+    boolean tienePermiso = false;
+    switch (pageToInclude) {
+        case "inicio":
+        case "citas":
+        case "configuracion":
+            tienePermiso = true;
+            break;
+        case "pacientes":
+            if (rol.equals("Administrador") || rol.equals("Recepcionista")) {
+                tienePermiso = true;
+            }
+            break;
+        case "odontologos":
+        case "usuarios": 
+            if (rol.equals("Administrador")) {
+                tienePermiso = true;
+            }
+            break;
+    }
+    if (!tienePermiso) {
+        pageToInclude = "inicio";
+    }
+    String contentPage = "../paginas-dashboard/" + pageToInclude + ".jsp";
 %>
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Dashboard - Clínica Dental</title>
-        <style>
-            body { font-family: sans-serif; margin: 0; background-color: #f8f9fa; }
-            .navbar { background-color: #343a40; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
-            .navbar a { color: white; text-decoration: none; padding: 0.5rem; background-color: #dc3545; border-radius: 4px; }
-            .container { padding: 2rem; }
-        </style>
-    </head>
-    <body>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Clínica Bienestar</title>
 
-        <div class="navbar">
-            <span>Usuario: <strong><%= usuario.getDocumentoIdentidad() %></strong> | Rol: <strong><%= usuario.getRol().getNombreRol() %></strong></span>
-            <a href="logout">Cerrar Sesión</a>
-        </div>
-        
-        <div class="container">
-            <h1>Dashboard Principal</h1>
-            <hr>
-            
-            <%-- Aquí podemos mostrar contenido diferente según el rol del usuario --%>
-            <% if (usuario.getRol().getNombreRol().equals("Administrador")) { %>
-                <h3>Menú de Administrador</h3>
-                <ul>
-                    <li>Gestionar Usuarios</li>
-                    <li>Ver Reportes Globales de la Clínica</li>
-                    <li>Configuraciones del Sistema</li>
-                </ul>
-            <% } else if (usuario.getRol().getNombreRol().equals("Odontologo")) { %>
-                <h3>Menú de Odontólogo</h3>
-                <ul>
-                    <li>Ver mis Citas de Hoy</li>
-                    <li>Consultar Historial de Pacientes</li>
-                    <li>Solicitar Insumos</li>
-                </ul>
-            <% } else if (usuario.getRol().getNombreRol().equals("Recepcionista")) { %>
-                <h3>Menú de Recepcionista</h3>
-                <ul>
-                    <li>Agendar Nueva Cita</li>
-                    <li>Gestionar Pacientes</li>
-                    <li>Ver Pagos</li>
-                </ul>
-            <% } else { %>
-                 <h3>Portal del Paciente</h3>
-                 <ul>
-                    <li>Ver mis Próximas Citas</li>
-                    <li>Consultar mi Historial de Tratamientos</li>
-                </ul>
-            <% } %>
+    <%-- ================================================================= --%>
+    <%-- ==           CORRECCIÓN 1: Carga de CSS con ruta absoluta      == --%>
+    <%-- ================================================================= --%>
+    <% if ("Paciente".equals(rol)) { %>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/dashboard/dashboard-patient-styles.css">
+    <% } else { %>
+         <link rel="stylesheet" href="${pageContext.request.contextPath}/dashboard/dashboard-styles.css">
+    <% } %>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+    <%-- ================================================================= --%>
+    <%-- ==           CORRECCIÓN 2: Librería de gráficos Chart.js         == --%>
+    <%-- ================================================================= --%>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body class="<%= "Paciente".equals(rol) ? "paciente-view-body" : "" %>">
+
+    <% if ("Paciente".equals(rol)) { %>
+        <%-- LAYOUT PARA PACIENTES --%>
+        <div class="patient-portal-container">
+            <header class="patient-header">
+                 <div class="patient-logo">
+
+                     <i class="fa-solid fa-clinic-medical"></i>
+                    Clínica Bienestar
+                </div>
+                <nav class="patient-main-nav">
+                    <a href="dashboard.jsp?page=inicio" class="<%= "inicio".equals(pageToInclude) ? "active" : "" %>">Inicio</a>
+                    <a href="dashboard.jsp?page=citas" class="<%= "citas".equals(pageToInclude) ? "active" : "" %>">Mis Citas</a>
+                    <a href="#">Agendar Cita</a>
+                    <a href="#">Nuestros Médicos</a>
+                    <a href="#">Servicios</a>
+                </nav>
+
+                 <div class="patient-user-profile">
+                    <i class="fa-regular fa-user-circle"></i>
+                    <span>Gloria</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+            </header>
+
+             <main class="patient-content-area">
+                <jsp:include page="<%= contentPage %>" />
+            </main>
         </div>
 
-    </body>
+    <% } else { %>
+        <%-- LAYOUT ORIGINAL PARA ADMIN/RECEPCIONISTA --%>
+        <aside class="sidebar">
+             <div class="sidebar-header">
+
+                 <img src="https://i.imgur.com/Oz512AH.png" alt="Logo Sonrisa Plena" class="logo-icon">
+                <h2>SONRISA PLENA</h2>
+            </div>
+             <nav class="sidebar-nav">
+               <ul>
+                   <li class="<%= "inicio".equals(pageToInclude) ? "active" : "" %>"><a href="dashboard.jsp?page=inicio"><i class="fa-solid fa-chart-pie"></i> inicio</a></li>
+                   <% if (rol.equals("Administrador") || rol.equals("Recepcionista")) { %>
+                       <li class="<%= "pacientes".equals(pageToInclude) ? "active" : "" %>"><a href="dashboard.jsp?page=pacientes"><i class="fa-solid fa-hospital-user"></i> Pacientes</a></li>
+                   <% } %>
+                   <li class="<%= "citas".equals(pageToInclude) ? "active" : "" %>"><a href="dashboard.jsp?page=citas"><i class="fa-solid fa-calendar-days"></i> Citas</a></li>
+                   <% if (rol.equals("Administrador")) { %>
+                       <li class="<%= "odontologos".equals(pageToInclude) ? "active" : "" %>"><a href="dashboard.jsp?page=odontologos"><i class="fa-solid fa-user-doctor"></i> Odontólogos</a></li>
+                       <li class="<%= "usuarios".equals(pageToInclude) ? "active" : "" %>"><a href="dashboard.jsp?page=usuarios"><i class="fa-solid fa-users-cog"></i> Usuarios</a></li>
+                   <% } %>
+               </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <jsp:include page="<%= contentPage %>" />
+        </main>
+
+    <% } %>
+
+</body>
 </html>

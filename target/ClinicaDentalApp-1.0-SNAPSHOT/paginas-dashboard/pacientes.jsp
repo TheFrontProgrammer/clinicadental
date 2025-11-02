@@ -7,7 +7,6 @@
 <%
     PacienteDAO pacienteDAO = new PacienteDAO();
     List<Paciente> listaPacientes = pacienteDAO.listarPacientes();
-    // Mensajes de estado para las acciones
     String registroStatus = request.getParameter("registro");
     String updateStatus = request.getParameter("update");
     String deleteStatus = request.getParameter("delete");
@@ -20,27 +19,23 @@
     </div>
     <div class="header-actions">
         <a href="../logout" title="Cerrar Sesión" style="margin-right: 15px; color: var(--danger-red);"><i class="fa-solid fa-right-from-bracket"></i></a>
-        <%-- CAMBIO: El href="#" ahora es funcional --%>
         <a href="dashboard.jsp?page=configuracion" title="Configuración"><i class="fa-solid fa-cog"></i></a>
     </div>
 </header>
 
-<%-- Bloque para mostrar mensajes de estado --%>
 <% if ("exito".equals(registroStatus)) { %><div class="alert alert-success">¡Paciente registrado exitosamente!</div><% } %>
-<% if ("error".equals(registroStatus)) { %><div 
-class="alert alert-danger">Error: No se pudo registrar al paciente.</div><% } %>
+<% if ("error".equals(registroStatus)) { %><div class="alert alert-danger">Error: No se pudo registrar al paciente.</div><% } %>
 <% if ("exito".equals(updateStatus)) { %><div class="alert alert-success">¡Paciente actualizado exitosamente!</div><% } %>
 <% if ("error".equals(updateStatus)) { %><div class="alert alert-danger">Error: No se pudo actualizar al paciente.</div><% } %>
 <% if ("exito".equals(deleteStatus)) { %><div class="alert alert-success">¡Paciente eliminado exitosamente!</div><% } %>
 <% if ("error".equals(deleteStatus)) { %><div class="alert alert-danger">Error: No se pudo eliminar al paciente.</div><% } %>
 
 <section class="content-card">
-    <h3>Lista de Pacientes activos</h3>
+    <h3>Lista de Pacientes Activos</h3>
     <table>
         <thead>
-            <tr>
-           
-                 <th>Nombre completo</th>
+             <tr>
+                <th>Nombre completo</th>
                 <th>Documento</th>
                 <th>Email</th>
                 <th>Teléfono</th>
@@ -59,16 +54,12 @@ class="alert alert-danger">Error: No se pudo registrar al paciente.</div><% } %>
                         <td><%= p.getNombreCompleto() %></td>
                         <td><%= p.getUsuario().getDocumentoIdentidad() %></td>
                         <td><%= p.getEmail() %></td>
-  
-                       <td><%= (pCompleto.getTelefono() != null ? pCompleto.getTelefono() : "N/A") %></td>
+                        <td><%= (pCompleto.getTelefono() != null ? pCompleto.getTelefono() : "N/A") %></td>
                         <td class="action-icons">
-                            <a href="#" class="view-btn" title="Ver Detalles" data-nombre="<%= pCompleto.getNombreCompleto() %>" data-documento="<%= pCompleto.getUsuario().getDocumentoIdentidad() %>" data-email="<%= pCompleto.getEmail() %>" data-telefono="<%= (pCompleto.getTelefono() != 
-null ? pCompleto.getTelefono() : "") %>" data-direccion="<%= (pCompleto.getDireccion() != null ? pCompleto.getDireccion() : "") %>" data-alergias="<%= (pCompleto.getAlergias() != null ? pCompleto.getAlergias() : "") %>" data-genero="<%= (pCompleto.getGenero() != null ? pCompleto.getGenero() : "") %>" data-nacimiento="<%= fechaNacStr %>"><i class="fa-solid fa-eye"></i></a>
-                            <a href="#" class="edit-btn" title="Editar" data-id="<%= pCompleto.getPacienteId() %>" data-nombre="<%= pCompleto.getNombre() %>" data-apellido="<%= pCompleto.getApellido() %>" data-email="<%= pCompleto.getEmail() %>" data-telefono="<%= (pCompleto.getTelefono() != null ?
-pCompleto.getTelefono() : "") %>" data-direccion="<%= (pCompleto.getDireccion() != null ? pCompleto.getDireccion() : "") %>" data-alergias="<%= (pCompleto.getAlergias() != null ? pCompleto.getAlergias() : "") %>" data-genero="<%= (pCompleto.getGenero() != null ? pCompleto.getGenero() : "") %>" data-nacimiento="<%= fechaNacStr %>"><i class="fa-solid fa-pencil"></i></a>
+                            <a href="#" class="view-btn" title="Ver Detalles" data-nombre="<%= pCompleto.getNombreCompleto() %>" data-documento="<%= pCompleto.getUsuario().getDocumentoIdentidad() %>" data-email="<%= pCompleto.getEmail() %>" data-telefono="<%= (pCompleto.getTelefono() != null ? pCompleto.getTelefono() : "") %>" data-direccion="<%= (pCompleto.getDireccion() != null ? pCompleto.getDireccion() : "") %>" data-alergias="<%= (pCompleto.getAlergias() != null ? pCompleto.getAlergias() : "") %>" data-genero="<%= (pCompleto.getGenero() != null ? pCompleto.getGenero() : "") %>" data-nacimiento="<%= fechaNacStr %>"><i class="fa-solid fa-eye"></i></a>
+                            <a href="#" class="edit-btn" title="Editar" data-id="<%= pCompleto.getPacienteId() %>" data-nombre="<%= pCompleto.getNombre() %>" data-apellido="<%= pCompleto.getApellido() %>" data-email="<%= pCompleto.getEmail() %>" data-telefono="<%= (pCompleto.getTelefono() != null ? pCompleto.getTelefono() : "") %>" data-direccion="<%= (pCompleto.getDireccion() != null ? pCompleto.getDireccion() : "") %>" data-alergias="<%= (pCompleto.getAlergias() != null ? pCompleto.getAlergias() : "") %>" data-genero="<%= (pCompleto.getGenero() != null ? pCompleto.getGenero() : "") %>" data-nacimiento="<%= fechaNacStr %>"><i class="fa-solid fa-pencil"></i></a>
                             <a href="#" class="delete-btn" title="Eliminar" data-id="<%= p.getPacienteId() %>" data-nombre="<%= p.getNombreCompleto() %>"><i class="fa-solid fa-trash"></i></a>
                         </td>
-  
                    </tr>
                 <% } %>
             <% } %>
@@ -77,46 +68,48 @@ pCompleto.getTelefono() : "") %>" data-direccion="<%= (pCompleto.getDireccion() 
 </section>
 
 <section class="content-card">
-    <h3>Registro rápido de paciente</h3>
+    <h3>Registro de Paciente</h3>
     <form action="../registroPaciente" method="post" class="quick-register-form">
-        <div class="form-grid-register">
+        <div class="form-grid-register" style="grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
             <div class="form-group">
- 
-               <label for="doc">Número de Documento</label>
+               <label for="doc">Número de Documento *</label>
                 <input type="text" id="doc" name="documento" placeholder="Ej: 70022045" required maxlength="8" pattern="\d{8}" title="El DNI debe contener 8 dígitos.">
             </div>
             <div class="form-group">
-                <label for="nombre">Nombre(s)</label>
-          
+                <label for="nombre">Nombre(s) *</label>
                <input type="text" id="nombre" name="nombre" placeholder="Ej: Juan" required>
             </div>
             <div class="form-group">
-                <label for="apellido">Apellido(s)</label>
+                <label for="apellido">Apellido(s) *</label>
                 <input type="text" id="apellido" name="apellido" placeholder="Ej: Perez" required>
             </div>
-            
- <div class="form-group">
-                <label for="email">Correo Electrónico</label>
-                <input type="email" id="email" name="email" placeholder="Ej: juan.perez@example.com" required>
+            <div class="form-group">
+                <label for="fechaNacimiento">Fecha de Nacimiento</label>
+                <input type="date" id="fechaNacimiento" name="fechaNacimiento">
             </div>
             <div class="form-group">
-                <label for="genero">Género</label>
-                <select 
- id="genero" name="genero" required>
+                <label for="genero">Género *</label>
+                 <select id="genero" name="genero" required>
                     <option value="" disabled selected>-- Seleccionar --</option>
                     <option value="M">Masculino</option>
                     <option value="F">Femenino</option>
                     <option value="O">Otro</option>
-          
                </select>
             </div>
-            <div class="form-actions-register">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="terms" name="terms" required>
-                    <label for="terms">Acepto los términos</label>
-     
-                </div>
-                <button type="submit" class="btn-primary">Registrar</button>
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="text" id="telefono" name="telefono" placeholder="Ej: 987654321">
+            </div>
+             <div class="form-group">
+                <label for="email">Correo Electrónico *</label>
+                <input type="email" id="email" name="email" placeholder="Ej: juan.perez@example.com" required>
+            </div>
+            <div class="form-group" style="grid-column: 2 / 4;">
+                <label for="direccion">Dirección</label>
+                <input type="text" id="direccion" name="direccion" placeholder="Ej: Av. Principal 123, Lima">
+            </div>
+            <div class="form-actions-register" style="grid-column: 3; justify-content: flex-end;">
+                <button type="submit" class="btn-primary">Registrar Paciente</button>
             </div>
         </div>
     </form>

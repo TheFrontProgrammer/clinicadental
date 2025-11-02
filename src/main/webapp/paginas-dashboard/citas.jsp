@@ -1,15 +1,108 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="java.util.List"%>
-<%@page import="java.time.format.DateTimeFormatter"%>
-<%@page import="java.time.temporal.ChronoUnit"%>
-<%@page import="java.time.LocalDate"%>
-<%@page import="com.dental.app.clinicadentalapp.model.Cita"%>
-<%@page import="com.dental.app.clinicadentalapp.dao.CitaDAO"%>
-<%@page import="com.dental.app.clinicadentalapp.model.Paciente"%>
-<%@page import="com.dental.app.clinicadentalapp.dao.PacienteDAO"%>
-<%@page import="com.dental.app.clinicadentalapp.model.Odontologo"%>
-<%@page import="com.dental.app.clinicadentalapp.dao.OdontologoDAO"%>
+<%@page import="java.util.List, java.util.ArrayList, java.util.stream.Collectors, java.time.format.DateTimeFormatter, java.time.temporal.ChronoUnit, java.time.LocalDate, java.time.LocalTime"%>
+<%@page import="com.dental.app.clinicadentalapp.model.Usuario, com.dental.app.clinicadentalapp.model.Cita, com.dental.app.clinicadentalapp.model.Paciente, com.dental.app.clinicadentalapp.model.Odontologo"%>
+<%@page import="com.dental.app.clinicadentalapp.dao.CitaDAO, com.dental.app.clinicadentalapp.dao.PacienteDAO, com.dental.app.clinicadentalapp.dao.OdontologoDAO"%>
 
+<%
+    // Obtener el rol del usuario para decidir qué vista mostrar
+    Usuario usuario = (Usuario) session.getAttribute("usuario");
+    String rol = (usuario != null && usuario.getRol() != null) ? usuario.getRol().getNombreRol() : "";
+%>
+
+<% if ("Paciente".equals(rol)) { %>
+<%-- ============================================= --%>
+<%-- ==   VISTA PARA EL ROL DE PACIENTE   == --%>
+<%-- ============================================= --%>
+<%
+    // --- LÓGICA DE DATOS PARA LA VISTA DE CITAS DEL PACIENTE ---
+    CitaDAO citaDAOPaciente = new CitaDAO();
+    List<Cita> todasLasCitas = citaDAOPaciente.listarCitas();
+    LocalDate hoy = LocalDate.now();
+
+    // Filtrar citas del paciente logueado
+    List<Cita> misCitas = todasLasCitas.stream()
+        .filter(c -> c.getPaciente().getUsuario().getDocumentoIdentidad().equals(usuario.getDocumentoIdentidad()))
+        .collect(Collectors.toList());
+    List<Cita> proximasCitas = misCitas.stream()
+        .filter(c -> !c.getFechaCita().isBefore(hoy))
+        .sorted((c1, c2) -> c1.getFechaCita().compareTo(c2.getFechaCita())) // Ordenar por fecha
+        .collect(Collectors.toList());
+    List<Cita> historialCitas = misCitas.stream()
+        .filter(c -> c.getFechaCita().isBefore(hoy))
+        .sorted((c1, c2) -> c2.getFechaCita().compareTo(c1.getFechaCita())) // Ordenar descendente
+        .collect(Collectors.toList());
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
+%>
+<div class="mis-citas-container">
+    <div class="citas-header">
+        <h1>Mis Citas</h1>
+        <a href="#" class="btn-primary-citas">+ Agendar Nueva Cita</a>
+    </div>
+
+    <section class="citas-section">
+        <h2>Próximas Citas</h2>
+        <div class="timeline">
+            <% if (proximasCitas.isEmpty()) { %>
+                <p class="no-citas-msg">No tienes ninguna cita programada.</p>
+            <% } else { %>
+                <% for (Cita c : proximasCitas) { %>
+                    <div class="timeline-item active">
+                        <div class="timeline-point"></div>
+                        <div class="timeline-card">
+                            <div class="timeline-card-header">
+                                <div class="fecha-box">
+                                    <span class="dia"><%= c.getFechaCita().getDayOfMonth() %></span>
+                                    <span class="mes-ano"><%= c.getFechaCita().format(DateTimeFormatter.ofPattern("MMM yyyy")).toUpperCase() %></span>
+                                </div>
+                                <div class="info-doctor">
+                                    <strong>Dr(a). <%= c.getOdontologo().getNombreCompleto() %></strong>
+                                    <span>Medicina General</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                            <div class="timeline-card-body">
+                                <span><i class="fa-regular fa-clock"></i> <%= c.getHoraCita().format(timeFormatter) %></span>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            <% } %>
+        </div>
+    </section>
+
+    <section class="citas-section">
+        <h2>Historial</h2>
+        <div class="timeline">
+            <% if (historialCitas.isEmpty()) { %>
+                 <p class="no-citas-msg">Aún no tienes un historial de citas.</p>
+            <% } else { %>
+                 <% for (Cita c : historialCitas) { %>
+                    <div class="timeline-item">
+                        <div class="timeline-point"></div>
+                        <div class="timeline-card">
+                             <div class="timeline-card-header">
+                                <div class="fecha-box">
+                                     <span class="dia"><%= c.getFechaCita().getDayOfMonth() %></span>
+                                     <span class="mes-ano"><%= c.getFechaCita().format(DateTimeFormatter.ofPattern("MMM yyyy")).toUpperCase() %></span>
+                                </div>
+                                <div class="info-doctor">
+                                    <strong>Dr(a). <%= c.getOdontologo().getNombreCompleto() %></strong>
+                                    <span>Medicina General</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 <% } %>
+            <% } %>
+        </div>
+    </section>
+</div>
+
+<% } else { %>
+<%-- =================================================================== --%>
+<%-- ==   VISTA PARA ROLES DE ADMINISTRADOR Y RECEPCIONISTA  == --%>
+<%-- =================================================================== --%>
 <%
     CitaDAO citaDAO = new CitaDAO();
     PacienteDAO pacienteDAO = new PacienteDAO();
@@ -22,8 +115,8 @@
     String registroStatus = request.getParameter("registro");
     String updateStatus = request.getParameter("update");
     String deleteStatus = request.getParameter("delete");
+    LocalDate hoy = LocalDate.now();
 %>
-
 <header class="header">
     <h1>Gestión de Citas</h1>
     <div class="header-actions">
@@ -33,9 +126,8 @@
     </div>
 </header>
 
-<%-- Mensajes de estado --%>
-<% if ("exito".equals(registroStatus)) { %><div class="alert alert-success">¡Cita agendada exitosamente!</div><% } %>
-<% if ("error".equals(registroStatus)) { %><div class="alert alert-danger">Error: No se pudo agendar la cita. Verifique los datos.</div><% } %>
+<% if ("exito".equals(registroStatus)) { %><div class="alert alert-success">¡Cita registrada exitosamente!</div><% } %>
+<% if ("error".equals(registroStatus)) { %><div class="alert alert-danger">Error: No se pudo registrar la cita.</div><% } %>
 <% if ("error_horario".equals(registroStatus)) { %><div class="alert alert-danger">Error: El horario seleccionado ya está ocupado.</div><% } %>
 <% if ("exito".equals(updateStatus)) { %><div class="alert alert-success">¡Cita actualizada exitosamente!</div><% } %>
 <% if ("error".equals(updateStatus)) { %><div class="alert alert-danger">Error: No se pudo actualizar la cita.</div><% } %>
@@ -43,20 +135,7 @@
 <% if ("error".equals(deleteStatus)) { %><div class="alert alert-danger">Error: No se pudo eliminar la cita.</div><% } %>
 
 <section class="content-card">
-    
-    <div class="card-header">
-        <h3>Citas Programadas</h3>
-        <div class="filter-group">
-            <label for="filtroPaciente">Filtrar por Paciente:</label>
-            <select id="filtroPaciente">
-                <option value="todos">-- Mostrar Todos --</option>
-                <% for (Paciente p : listaPacientes) { %>
-                    <option value="<%= p.getPacienteId() %>"><%= p.getNombreCompleto() %></option>
-                <% } %>
-            </select>
-        </div>
-    </div>
-    
+    <h3>Lista de Citas Programadas</h3>
     <table>
         <thead>
             <tr>
@@ -67,138 +146,117 @@
                 <th>Estado</th>
                 <th>Acciones</th>
             </tr>
-         </thead>
-        <tbody id="citasTableBody">
+        </thead>
+        <tbody>
             <% if (listaCitas.isEmpty()) { %>
                 <tr><td colspan="6" style="text-align: center;">No hay citas programadas.</td></tr>
-            <% } else { for (Cita c : listaCitas) { %>
-                 <%
-                    LocalDate hoy = LocalDate.now();
-                    LocalDate fechaCita = c.getFechaCita();
-                    long diasDiferencia = ChronoUnit.DAYS.between(hoy, fechaCita);
-                    String tiempoRestante;
-                    String statusClassBadge; // Para el badge de tiempo
-                    
-                    if (diasDiferencia < 0) {
-                        tiempoRestante = "Pasada";
-                        statusClassBadge = "status-past"; 
-                    } else if (diasDiferencia == 0) {
+            <% } else { %>
+                <% for (Cita c : listaCitas) { 
+                    long daysBetween = ChronoUnit.DAYS.between(hoy, c.getFechaCita());
+                    String tiempoRestante = "";
+                    String badgeColor = "";
+
+                    if (daysBetween < 0) {
+                        tiempoRestante = "Finalizada";
+                        badgeColor = "gray";
+                    } else if (daysBetween == 0) {
                         tiempoRestante = "Hoy";
-                        statusClassBadge = "status-soon"; 
-                    } else if (diasDiferencia <= 7) {
-                        tiempoRestante = "En " + diasDiferencia + " día(s)"; // Más claro
-                        statusClassBadge = "status-soon"; 
+                        badgeColor = "orange";
+                    } else if (daysBetween == 1) {
+                        tiempoRestante = "En 1 día";
+                        badgeColor = "yellow";
+                    } else if (daysBetween <= 7) {
+                        tiempoRestante = "En " + daysBetween + " día(s)";
+                        badgeColor = "yellow";
+                    } else if (daysBetween <= 14){
+                        tiempoRestante = "En 1 sem.";
+                        badgeColor = "green";
                     } else {
-                        long semanas = diasDiferencia / 7;
-                        tiempoRestante = "En " + semanas + (semanas > 1 ? " sem." : " sem."); // Abreviado
-                        statusClassBadge = "status-future";
-                    }
-                    
-                    // CAMBIO: Lógica para el color del punto de estado
-                    String estadoCita = c.getEstado();
-                    String statusClassDot = "dot-gray"; // Gris por defecto
-                    if ("Programada".equalsIgnoreCase(estadoCita) || "Confirmada".equalsIgnoreCase(estadoCita)) {
-                        statusClassDot = "dot-green";
-                    } else if ("Pendiente".equalsIgnoreCase(estadoCita)) {
-                        statusClassDot = "dot-yellow";
-                    } else if ("Cancelada".equalsIgnoreCase(estadoCita)) {
-                        statusClassDot = "dot-red";
+                        long weeks = daysBetween / 7;
+                        tiempoRestante = "En " + weeks + " sem.";
+                        badgeColor = "green";
                     }
                 %>
-                <tr data-paciente-id="<%= c.getPaciente().getPacienteId() %>">
-                    <td><%= c.getPaciente().getNombreCompleto() %></td>
-                    <td><%= c.getOdontologo().getNombreCompleto() %></td>
-                    <td><%= c.getFechaCita().format(dateFormatter) %> a las <%= c.getHoraCita().format(timeFormatter) %></td>
-                    <td><span class="status-badge <%= statusClassBadge %>"><%= tiempoRestante %></span></td>
-                    <%-- CAMBIO: Añadido el punto de estado --%>
-                    <td>
-                        <span class="status-dot <%= statusClassDot %>"></span>
-                        <span><%= estadoCita %></span>
-                    </td>
-                    <td class="action-icons">
-                        <%-- IDEA 3: Asegurar tooltips (title) --%>
-                        <a href="#" class="edit-btn view-btn" title="Ver/Editar Cita" <%-- Combinado Ver/Editar si abre el mismo modal --%>
-                           data-cita-id="<%= c.getCitaId() %>"
-                           data-paciente-id="<%= c.getPaciente().getPacienteId() %>"
-                           data-odontologo-id="<%= c.getOdontologo().getOdontologoId() %>"
-                           data-fecha="<%= c.getFechaCita().toString() %>"
-                           data-hora="<%= c.getHoraCita().toString() %>"
-                           data-motivo="<%= c.getMotivo() %>">
-                            <i class="fa-solid fa-pencil"></i>
-                        </a>
-                        <a href="#" class="delete-btn" title="Eliminar Cita"
-                           data-cita-id="<%= c.getCitaId() %>"
-                           data-paciente-nombre="<%= c.getPaciente().getNombreCompleto() %>"
-                           data-fecha="<%= c.getFechaCita().format(dateFormatter) %>">
-                           <i class="fa-solid fa-trash"></i>
-                         </a>
-                    </td>
-                </tr>
-            <% }} %>
+                    <tr>
+                        <td><%= c.getPaciente().getNombreCompleto() %></td>
+                        <td><%= c.getOdontologo().getNombreCompleto() %></td>
+                        <td><%= c.getFechaCita().format(dateFormatter) %> a las <%= c.getHoraCita().format(timeFormatter) %></td>
+                        <td><span class="badge badge-<%= badgeColor %>"><%= tiempoRestante %></span></td>
+                        <td><span class="status-dot dot-green"></span><%= c.getEstado() %></td>
+                        <td class="action-icons">
+                            <a href="#" class="edit-btn" title="Editar" 
+                               data-id="<%= c.getCitaId() %>"
+                               data-paciente-id="<%= c.getPaciente().getPacienteId() %>"
+                               data-odontologo-id="<%= c.getOdontologo().getOdontologoId() %>"
+                               data-fecha="<%= c.getFechaCita() %>"
+                               data-hora="<%= c.getHoraCita() %>"
+                               data-motivo="<%= c.getMotivo() %>"
+                               data-estado="<%= c.getEstado() %>">
+                                <i class="fa-solid fa-pencil"></i>
+                            </a>
+                            <a href="#" class="delete-btn" title="Eliminar" data-id="<%= c.getCitaId() %>" data-paciente="<%= c.getPaciente().getNombreCompleto() %>">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                <% } %>
+            <% } %>
         </tbody>
     </table>
 </section>
 
-<div id="agendarModal" class="modal">
+<div id="citaModal" class="modal">
     <div class="modal-content">
-        <button class="close-btn">&times;</button> <%-- Botón en lugar de span --%>
-        <h2>Agendar Nueva Cita</h2>
-        <form action="../cita" method="post">
-            <input type="hidden" name="action" value="agendar">
+        <span class="close-btn">&times;</span>
+        <h2 id="modalTitle">Agendar Nueva Cita</h2>
+        <form id="citaForm" action="../cita" method="post">
+            <input type="hidden" name="action" id="formAction" value="agendar">
+            <input type="hidden" name="citaId" id="editCitaId">
+
             <div class="form-grid-modal">
-                <div class="form-group full-width"><label for="agendarPacienteId">Paciente*</label>
-                    <select id="agendarPacienteId" name="pacienteId" required>
-                       <option value="" disabled selected>Seleccione un paciente</option>
+                <div class="form-group">
+                    <label for="pacienteId">Paciente</label>
+                    <select id="pacienteId" name="pacienteId" required>
+                        <option value="" disabled selected>-- Seleccionar Paciente --</option>
                         <% for (Paciente p : listaPacientes) { %>
                             <option value="<%= p.getPacienteId() %>"><%= p.getNombreCompleto() %></option>
                         <% } %>
                     </select>
                 </div>
-                <div class="form-group full-width"><label for="agendarOdontologoId">Odontólogo*</label>
-                    <select id="agendarOdontologoId" name="odontologoId" required>
-                         <option value="" disabled selected>Seleccione un odontólogo</option>
+                <div class="form-group">
+                    <label for="odontologoId">Odontólogo</label>
+                    <select id="odontologoId" name="odontologoId" required>
+                        <option value="" disabled selected>-- Seleccionar Odontólogo --</option>
                         <% for (Odontologo o : listaOdontologos) { %>
                             <option value="<%= o.getOdontologoId() %>"><%= o.getNombreCompleto() %></option>
                         <% } %>
                     </select>
                 </div>
-                <div class="form-group"><label for="agendarFecha">Fecha*</label><input type="date" id="agendarFecha" name="fecha" required></div>
-                <div class="form-group"><label for="agendarHora">Hora*</label><input type="time" id="agendarHora" name="hora" required></div>
-                <div class="form-group full-width"><label for="agendarMotivo">Motivo*</label><textarea id="agendarMotivo" name="motivo" required placeholder="Ej: Dolor de muela, limpieza dental..."></textarea></div>
+                <div class="form-group">
+                    <label for="fecha">Fecha</label>
+                    <input type="date" id="fecha" name="fecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="hora">Hora</label>
+                    <input type="time" id="hora" name="hora" required>
+                </div>
+                <div class="form-group full-width">
+                    <label for="motivo">Motivo de la Cita</label>
+                    <input type="text" id="motivo" name="motivo" placeholder="Ej: Limpieza, Consulta General, etc." required>
+                </div>
+                 <div class="form-group full-width" id="estadoContainer" style="display:none;">
+                    <label for="estado">Estado</label>
+                    <select id="estado" name="estado">
+                        <option value="Programada">Programada</option>
+                        <option value="Confirmada">Confirmada</option>
+                        <option value="Cancelada">Cancelada</option>
+                        <option value="Completada">Completada</option>
+                    </select>
+                </div>
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn-secondary cancel-btn">Cancelar</button>
-                <button type="submit" class="btn-primary">Guardar Cita</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div id="editarModal" class="modal">
-    <div class="modal-content">
-        <button class="close-btn">&times;</button>
-        <h2>Editar Cita</h2>
-        <form id="editForm" action="../cita" method="post">
-            <input type="hidden" name="action" value="editar">
-            <input type="hidden" name="citaId" id="editCitaId">
-            <div class="form-grid-modal">
-                 <div class="form-group full-width"><label for="editPacienteId">Paciente*</label>
-                     <select name="pacienteId" id="editPacienteId" required>
-                        <% for (Paciente p : listaPacientes) { %><option value="<%= p.getPacienteId() %>"><%= p.getNombreCompleto() %></option><% } %>
-                    </select>
-                </div>
-                 <div class="form-group full-width"><label for="editOdontologoId">Odontólogo*</label>
-                    <select name="odontologoId" id="editOdontologoId" required>
-                        <% for (Odontologo o : listaOdontologos) { %><option value="<%= o.getOdontologoId() %>"><%= o.getNombreCompleto() %></option><% } %>
-                    </select>
-                 </div>
-                <div class="form-group"><label for="editFecha">Fecha*</label><input type="date" name="fecha" id="editFecha" required></div>
-                <div class="form-group"><label for="editHora">Hora*</label><input type="time" name="hora" id="editHora" required></div>
-                <div class="form-group full-width"><label for="editMotivo">Motivo*</label><textarea name="motivo" id="editMotivo" required></textarea></div>
-            </div>
-             <div class="modal-actions">
-               <button type="button" class="btn-secondary cancel-btn">Cancelar</button>
-                <button type="submit" class="btn-primary">Actualizar Cita</button>
+                <button type="submit" class="btn-primary" id="modalSubmitBtn">Agendar Cita</button>
             </div>
         </form>
     </div>
@@ -206,135 +264,98 @@
 
 <div id="deleteModal" class="modal">
     <div class="modal-content text-center">
-        <button class="close-btn">&times;</button>
+        <span class="close-btn">&times;</span>
         <h2>Confirmar Eliminación</h2>
-        <p>¿Seguro que deseas eliminar la cita del paciente <strong id="deletePacienteNombre"></strong> para la fecha <strong id="deleteFecha"></strong>?</p>
+        <p>¿Estás seguro de que deseas eliminar la cita del paciente <strong id="deletePacienteNombre"></strong>?</p>
+        <p>Esta acción no se puede deshacer.</p>
         <div class="modal-actions">
-            <button type="button" class="btn-secondary cancel-btn">Cancelar</button>
-            <a id="confirmDeleteLink" href="#" class="btn-danger">Eliminar</a>
+            <button id="cancelDeleteBtn" class="btn-secondary">Cancelar</button>
+            <a id="confirmDeleteBtn" href="#" class="btn-danger">Eliminar</a>
         </div>
     </div>
 </div>
 
-
 <style>
-    .card-header { /* Asegurar que los estilos base se aplican si no están en global */
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px; 
+    .badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        color: #333;
     }
-    .filter-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .filter-group label {
-        font-weight: 500;
-        font-size: 0.9rem;
-    }
-    .filter-group select {
-        padding: 8px 12px; /* Ajustar padding */
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        font-family: inherit;
-        background-color: #fff;
-        font-size: 0.9rem;
-    }
-    /* Estilos para badges de tiempo restante */
-     .status-badge { 
-         padding: 3px 8px; /* Más pequeño */
-         border-radius: 12px; 
-         font-size: .75rem; /* Más pequeño */
-         font-weight: 600; 
-         color: #fff; 
-         text-align: center;
-         display: inline-block; /* Para que tome padding */
-         line-height: 1.4; /* Ajuste línea */
-     }
-    .status-past { background-color: #6c757d; } /* Pasada en gris */
-    .status-soon { background-color: #ffc107; color: #333; } /* Amarillo */
-    .status-future { background-color: #198754; } /* Verde más oscuro */
+    .badge-gray { background-color: #e9ecef; }
+    .badge-orange { background-color: #ffe8cc; color: #ff8c00; }
+    .badge-yellow { background-color: #fff3cd; color: #ffc107; }
+    .badge-green { background-color: #d4edda; color: #155724; }
 </style>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const alert = document.querySelector('.alert');
-    if(alert) setTimeout(() => alert.remove(), 5000);
-
-    const agendarModal = document.getElementById('agendarModal');
-    const editarModal = document.getElementById('editarModal');
+document.addEventListener('DOMContentLoaded', function () {
+    const citaModal = document.getElementById('citaModal');
     const deleteModal = document.getElementById('deleteModal');
-    const modals = [agendarModal, editarModal, deleteModal];
-
-    function openModal(modal) { if(modal) modal.classList.add('is-visible'); }
-    function closeModal(modal) { if(modal) modal.classList.remove('is-visible'); }
-
-    // Corregir: Asegurarse que el botón existe antes de añadir listener
     const agendarBtn = document.getElementById('agendarBtn');
-    if(agendarBtn) agendarBtn.addEventListener('click', () => openModal(agendarModal));
 
-    modals.forEach(modal => {
-        if (!modal) return;
-        // Usar querySelectorAll para botones de cerrar y cancelar
-        modal.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => {
-             btn.addEventListener('click', () => closeModal(modal));
-        });
-        modal.addEventListener('click', e => { if (e.target === modal) closeModal(modal); });
+    // --- Funciones para abrir y cerrar modales ---
+    const openModal = (modal) => modal.classList.add('is-visible');
+    const closeModal = (modal) => modal.classList.remove('is-visible');
+
+    // --- Lógica para abrir modal de AGENDAR CITA ---
+    agendarBtn.addEventListener('click', () => {
+        document.getElementById('modalTitle').textContent = 'Agendar Nueva Cita';
+        document.getElementById('citaForm').reset();
+        document.getElementById('formAction').value = 'agendar';
+        document.getElementById('editCitaId').value = '';
+        document.getElementById('estadoContainer').style.display = 'none';
+        document.getElementById('modalSubmitBtn').textContent = 'Agendar Cita';
+        openModal(citaModal);
     });
 
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
+    // --- Lógica para abrir modal de EDITAR CITA ---
+    document.querySelectorAll('.edit-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
-            // Llenar el modal de edición
-             document.getElementById('editCitaId').value = btn.dataset.citaId;
-             document.getElementById('editPacienteId').value = btn.dataset.pacienteId;
-             document.getElementById('editOdontologoId').value = btn.dataset.odontologoId;
-             document.getElementById('editFecha').value = btn.dataset.fecha;
-             document.getElementById('editHora').value = btn.dataset.hora;
-             document.getElementById('editMotivo').value = btn.dataset.motivo;
-            openModal(editarModal);
+            document.getElementById('modalTitle').textContent = 'Editar Cita';
+            document.getElementById('formAction').value = 'editar';
+            document.getElementById('modalSubmitBtn').textContent = 'Guardar Cambios';
+
+            // Poblar el formulario con los datos de la cita
+            document.getElementById('editCitaId').value = this.dataset.id;
+            document.getElementById('pacienteId').value = this.dataset.pacienteId;
+            document.getElementById('odontologoId').value = this.dataset.odontologoId;
+            document.getElementById('fecha').value = this.dataset.fecha;
+            document.getElementById('hora').value = this.dataset.hora;
+            document.getElementById('motivo').value = this.dataset.motivo;
+            document.getElementById('estado').value = this.dataset.estado;
+            document.getElementById('estadoContainer').style.display = 'block';
+
+            openModal(citaModal);
         });
     });
-    
- document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
+
+    // --- Lógica para abrir modal de ELIMINAR CITA ---
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
-             document.getElementById('deletePacienteNombre').textContent = btn.dataset.pacienteNombre;
-             document.getElementById('deleteFecha').textContent = btn.dataset.fecha;
-             document.getElementById('confirmDeleteLink').href = `../cita?action=eliminar&id=${btn.dataset.citaId}`;
+            const citaId = this.dataset.id;
+            const pacienteNombre = this.dataset.paciente;
+            document.getElementById('deletePacienteNombre').textContent = pacienteNombre;
+            document.getElementById('confirmDeleteBtn').href = `../cita?action=eliminar&id=${citaId}`;
             openModal(deleteModal);
         });
     });
-    
-    // --- FILTRO DE PACIENTES ---
-    const filtroPaciente = document.getElementById('filtroPaciente');
-    const citasTableBody = document.getElementById('citasTableBody');
-    // Corregir: Asegurarse que la tabla existe
-    if(filtroPaciente && citasTableBody) {
-        const filasCitas = citasTableBody.getElementsByTagName('tr');
-        
-        filtroPaciente.addEventListener('change', function() {
-            const pacienteIdSeleccionado = this.value;
 
-            for (let i = 0; i < filasCitas.length; i++) {
-                const fila = filasCitas[i];
-                
-                if (fila.dataset.pacienteId) {
-                    const idPacienteFila = fila.dataset.pacienteId;
-
-                    if (pacienteIdSeleccionado === "todos" || idPacienteFila === pacienteIdSeleccionado) {
-                        fila.style.display = ""; 
-                    } else {
-                        fila.style.display = "none"; 
-                    }
-                } else if (pacienteIdSeleccionado === "todos") {
-                     fila.style.display = ""; // Mostrar fila de "No hay citas"
-                } else {
-                     fila.style.display = "none"; // Ocultar fila de "No hay citas" si se filtra
-                }
-            }
-        });
-    }
+    // --- Lógica para cerrar todos los modales ---
+    [citaModal, deleteModal].forEach(modal => {
+        if (modal) {
+            modal.querySelector('.close-btn').addEventListener('click', () => closeModal(modal));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal(modal);
+            });
+             modal.querySelectorAll('.cancel-btn').forEach(btn => {
+                btn.addEventListener('click', () => closeModal(modal));
+            });
+        }
+    });
 });
 </script>
+<% } %>

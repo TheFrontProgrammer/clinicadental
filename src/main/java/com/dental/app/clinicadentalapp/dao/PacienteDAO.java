@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.dental.app.clinicadentalapp.dao;
 
 import com.dental.app.clinicadentalapp.model.Paciente;
@@ -15,10 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.mindrot.jbcrypt.BCrypt;
 
-/**
- *
- * @author Matheus
- */
 public class PacienteDAO {
     /**
      * Obtiene una lista de todos los pacientes de la base de datos.
@@ -26,7 +18,6 @@ public class PacienteDAO {
      */
     public List<Paciente> listarPacientes() {
         List<Paciente> pacientes = new ArrayList<>();
-        // Unimos Pacientes y Usuarios para obtener todos los datos necesarios
         String sql = "SELECT p.*, u.documento_identidad FROM Pacientes p " +
                      "JOIN Usuarios u ON p.usuario_id = u.usuario_id ORDER BY p.nombre, p.apellido";
 
@@ -41,7 +32,6 @@ public class PacienteDAO {
                 paciente.setApellido(rs.getString("apellido"));
                 paciente.setEmail(rs.getString("email"));
                 paciente.setAlergias(rs.getString("alergias"));
-                // etc. (puedes agregar los demás campos si los necesitas en la tabla)
 
                 Usuario usuario = new Usuario();
                 usuario.setUsuarioId(rs.getInt("usuario_id"));
@@ -57,23 +47,17 @@ public class PacienteDAO {
     }
     
     /**
-     * Registra un nuevo paciente. Esto implica dos pasos:
-     * 1. Crear un registro en la tabla Usuarios.
-     * 2. Crear un registro en la tabla Pacientes con el ID del nuevo usuario.
+     * Registra un nuevo paciente con todos sus detalles.
      * @param paciente El objeto paciente con los datos a registrar.
      * @return true si el registro fue exitoso, false en caso contrario.
      */
     public boolean registrarPaciente(Paciente paciente) {
-        // La contraseña por defecto será el DNI. El paciente deberá cambiarla después.
         String defaultPassword = paciente.getUsuario().getDocumentoIdentidad();
         String hashedPassword = BCrypt.hashpw(defaultPassword, BCrypt.gensalt());
-        
-        // Rol de Paciente es 4, según tu script de BD
         int rolPaciente = 4; 
         
-        // MODIFICADO: Añadido el campo 'genero' a la consulta SQL
         String sqlUsuario = "INSERT INTO Usuarios (documento_identidad, contrasena_hash, rol_id) VALUES (?, ?, ?) RETURNING usuario_id";
-        String sqlPaciente = "INSERT INTO Pacientes (usuario_id, nombre, apellido, email, genero) VALUES (?, ?, ?, ?, ?)";
+        String sqlPaciente = "INSERT INTO Pacientes (usuario_id, nombre, apellido, fecha_nacimiento, genero, telefono, email, direccion) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         
         Connection conn = null;
         try {
@@ -82,7 +66,6 @@ public class PacienteDAO {
             
             int nuevoUsuarioId = 0;
             
-            // 1. Insertar en Usuarios y obtener el ID generado
             try (PreparedStatement pstmtUsuario = conn.prepareStatement(sqlUsuario)) {
                 pstmtUsuario.setString(1, paciente.getUsuario().getDocumentoIdentidad());
                 pstmtUsuario.setString(2, hashedPassword);
@@ -96,14 +79,19 @@ public class PacienteDAO {
                 }
             }
             
-            // 2. Insertar en Pacientes usando el ID obtenido
             try (PreparedStatement pstmtPaciente = conn.prepareStatement(sqlPaciente)) {
                 pstmtPaciente.setInt(1, nuevoUsuarioId);
                 pstmtPaciente.setString(2, paciente.getNombre());
                 pstmtPaciente.setString(3, paciente.getApellido());
-                pstmtPaciente.setString(4, paciente.getEmail());
-                // MODIFICADO: Añadido el valor para el campo genero
-                pstmtPaciente.setString(5, paciente.getGenero()); 
+                if (paciente.getFechaNacimiento() != null) {
+                    pstmtPaciente.setDate(4, new java.sql.Date(paciente.getFechaNacimiento().getTime()));
+                } else {
+                    pstmtPaciente.setNull(4, java.sql.Types.DATE);
+                }
+                pstmtPaciente.setString(5, paciente.getGenero());
+                pstmtPaciente.setString(6, paciente.getTelefono());
+                pstmtPaciente.setString(7, paciente.getEmail());
+                pstmtPaciente.setString(8, paciente.getDireccion());
                 pstmtPaciente.executeUpdate();
             }
             
@@ -131,7 +119,6 @@ public class PacienteDAO {
             }
         }
     }
-
     // ==================================================================
     // ================ NUEVOS MÉTODOS AÑADIDOS AQUÍ ====================
     // ==================================================================

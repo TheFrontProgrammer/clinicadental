@@ -195,11 +195,15 @@ public class UsuarioDAO {
     }
 
     private void reiniciarIntentosFallidos(String docIdentidad) {
-        String sql = "UPDATE Usuarios SET intentos_fallidos = 0, bloqueado = 0 WHERE documento_identidad = ?";
+        String sql = "UPDATE Usuarios SET intentos_fallidos = 0, bloqueado = ? WHERE documento_identidad = ?";
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, docIdentidad);
+            
+            // CORRECCIÓN: Usar setBoolean para la columna booleana
+            pstmt.setBoolean(1, false); 
+            pstmt.setString(2, docIdentidad);
             pstmt.executeUpdate();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
