@@ -45,7 +45,9 @@ public class RegistroPacienteController extends HttpServlet {
         
         // 3. Usar el DAO para registrar
         PacienteDAO pacienteDAO = new PacienteDAO();
-        boolean exito = pacienteDAO.registrarPaciente(paciente);
+        
+        // ===== CAMBIO AQUÍ: Se pasa 'documento' (DNI) como password por defecto =====
+        boolean exito = pacienteDAO.registrarPaciente(paciente, documento);
         
         // 4. Redirigir a la página de pacientes con un mensaje
         if (exito) {

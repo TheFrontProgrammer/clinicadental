@@ -49,12 +49,17 @@ public class PacienteDAO {
     /**
      * Registra un nuevo paciente con todos sus detalles.
      * @param paciente El objeto paciente con los datos a registrar.
+     * @param password La contraseña en texto plano para hashear.
      * @return true si el registro fue exitoso, false en caso contrario.
      */
-    public boolean registrarPaciente(Paciente paciente) {
-        String defaultPassword = paciente.getUsuario().getDocumentoIdentidad();
-        String hashedPassword = BCrypt.hashpw(defaultPassword, BCrypt.gensalt());
-        int rolPaciente = 4; 
+    // ================== INICIO DE LA CORRECCIÓN ==================
+    // CAMBIO 1: Se añadió el parámetro (String password)
+    public boolean registrarPaciente(Paciente paciente, String password) {
+        
+        // CAMBIO 2: Se usa el 'password' recibido en lugar del DNI
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        int rolPaciente = 4; // Rol de Paciente
+    // ================== FIN DE LA CORRECCIÓN ==================
         
         String sqlUsuario = "INSERT INTO Usuarios (documento_identidad, contrasena_hash, rol_id) VALUES (?, ?, ?) RETURNING usuario_id";
         String sqlPaciente = "INSERT INTO Pacientes (usuario_id, nombre, apellido, fecha_nacimiento, genero, telefono, email, direccion) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -68,7 +73,7 @@ public class PacienteDAO {
             
             try (PreparedStatement pstmtUsuario = conn.prepareStatement(sqlUsuario)) {
                 pstmtUsuario.setString(1, paciente.getUsuario().getDocumentoIdentidad());
-                pstmtUsuario.setString(2, hashedPassword);
+                pstmtUsuario.setString(2, hashedPassword); // Se usa el hash correcto
                 pstmtUsuario.setInt(3, rolPaciente);
                 
                 ResultSet rs = pstmtUsuario.executeQuery();
@@ -120,7 +125,7 @@ public class PacienteDAO {
         }
     }
     // ==================================================================
-    // ================ NUEVOS MÉTODOS AÑADIDOS AQUÍ ====================
+    // ================ MÉTODOS EXISTENTES SIN CAMBIOS ====================
     // ==================================================================
 
     /**

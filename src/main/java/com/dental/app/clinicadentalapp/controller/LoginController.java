@@ -35,7 +35,12 @@ public class LoginController extends HttpServlet {
             System.out.println("LoginController: El DAO devolvió un usuario. ¡LOGIN EXITOSO!");
             HttpSession session = request.getSession();
             session.setAttribute("usuario", usuario);
-            response.sendRedirect("dashboard/dashboard.jsp");
+            
+            // =================================================================
+            // ==           CAMBIO: Añadimos ?login=success al redirigir      ==
+            // =================================================================
+            response.sendRedirect("dashboard/dashboard.jsp?login=success");
+            
         } else {
             String mensajeError = "";
             switch (usuario.getEstadoValidacion()) {

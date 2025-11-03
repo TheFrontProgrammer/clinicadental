@@ -338,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     .kpi-card-icon {
         width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center;
-        justify-content: center; font-size: 1.6rem; color: var(--white); flex-shrink: 0; 
+        justify-content: center; font-size: 1.5rem; color: var(--white); flex-shrink: 0; 
     }
     .icon-pacientes { background-color: var(--primary-blue); }
     .icon-citas { background-color: var(--success-green); }

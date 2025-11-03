@@ -34,7 +34,6 @@ public class RegistroController extends HttpServlet {
         String direccion = request.getParameter("direccion");
 
         // --- Validaciones del lado del servidor ---
-        // CORRECCIÓN: Se mejoró la lógica de validación del DNI para ser más precisa.
         if (docIdentidad == null || !docIdentidad.matches("\\d{8}")) {
             request.setAttribute("error", "El DNI debe tener 8 dígitos.");
             request.getRequestDispatcher("registro.jsp").forward(request, response);
@@ -78,7 +77,9 @@ public class RegistroController extends HttpServlet {
 
         // --- Usar PacienteDAO para el registro transaccional ---
         PacienteDAO pacienteDAO = new PacienteDAO();
-        if (pacienteDAO.registrarPaciente(paciente)) {
+        
+        // ===== CAMBIO CLAVE: Se pasa la variable 'password' al método del DAO =====
+        if (pacienteDAO.registrarPaciente(paciente, password)) {
             // Si el registro es exitoso, redirigir al login con un mensaje
             response.sendRedirect("index.jsp?registro=exitoso");
         } else {
