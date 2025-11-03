@@ -103,7 +103,7 @@
         <%-- LAYOUT ORIGINAL PARA ADMIN/RECEPCIONISTA --%>
         <aside class="sidebar">
              <div class="sidebar-header">
-                 <img src="https://i.imgur.com/x5A5p2B.png" alt="Logo Sonrisa Plena" class="logo-icon">
+                 <img src="https://i.imgur.com/Oz512AH.png" alt="Logo Sonrisa Plena" class="logo-icon">
                 <h2>SONRISA PLENA</h2>
             </div>
              <nav class="sidebar-nav">
