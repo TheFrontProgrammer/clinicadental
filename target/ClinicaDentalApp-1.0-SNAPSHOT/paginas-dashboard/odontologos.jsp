@@ -89,8 +89,24 @@ oCompleto.getTelefono() : "" %>">
  required maxlength="8" pattern="\d{8}"></div>
             <div class="form-group"><label>Nombre(s)</label><input type="text" name="nombre" placeholder="Ej: Carlos" required></div>
             <div class="form-group"><label>Apellido(s)</label><input type="text" name="apellido" placeholder="Ej: Rodriguez" required></div>
-            <div class="form-group"><label>Especialidad</label><input type="text" name="especialidad" placeholder="Ej: Endodoncia" required></div>
-            <div class="form-group"><label>Teléfono</label><input type="text" name="telefono" placeholder="Ej: 987654321"></div>
+            <div class="form-group">
+                <label>Especialidad</label>
+                <select name="especialidad" required>
+                    <option value="" disabled selected>-- Seleccionar --</option>
+                    <option value="Dentista general">Dentista general</option>
+                    <option value="Odontopediatra">Odontopediatra</option>
+                    <option value="Ortodoncista">Ortodoncista</option>
+                    <option value="Periodoncista">Periodoncista</option>
+                    <option value="Endodoncista">Endodoncista</option>
+                    <option value="Patólogo oral">Patólogo oral</option>
+                    <option value="Prostodoncista">Prostodoncista</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Teléfono</label>
+                <input type="text" name="telefono" placeholder="Ej: 987654321" 
+                       pattern="\d{9}" maxlength="9" title="El teléfono debe contener 9 dígitos.">
+            </div> 
             <div class="form-group"><label>Email</label><input type="email" name="email" placeholder="Ej: carlos.r@email.com" required></div>
          
            <div class="form-actions-register" style="grid-column: 3; justify-content: flex-end;"><button type="submit" class="btn-primary">Registrar</button></div>

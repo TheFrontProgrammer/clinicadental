@@ -146,7 +146,11 @@
                <div class="form-group"><label>Nombre:</label><input type="text" id="editNombre" name="nombre"></div>
                 <div class="form-group"><label>Apellido:</label><input type="text" id="editApellido" name="apellido"></div>
                 <div class="form-group"><label>Email:</label><input type="email" id="editEmail" name="email"></div>
-                <div class="form-group"><label>Teléfono:</label><input type="text" id="editTelefono" name="telefono"></div>
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="text" id="telefono" name="telefono" placeholder="Ej: 987654321" 
+                           pattern="\d{9}" maxlength="9" title="El teléfono debe contener 9 dígitos.">
+                </div>  
                 <div class="form-group"><label>Fecha Nacimiento:</label><input type="date" id="editNacimiento" name="fechaNacimiento"></div>
              
                <div class="form-group">
