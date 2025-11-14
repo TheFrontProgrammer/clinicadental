@@ -1,8 +1,9 @@
-<%@page import="com.dental.app.clinicadentalapp.model.Paciente"%>
-<%@page import="com.dental.app.clinicadentalapp.dao.PacienteDAO"%>
-<%@page import="java.util.List"%>
-<%@page import="com.dental.app.clinicadentalapp.model.Usuario"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+
+<%@page import="com.dental.app.clinicadentalapp.PacienteDAO"%>
+<%@page import="com.dental.app.clinicadentalapp.model.Paciente"%>
+<%@page import="com.dental.app.clinicadentalapp.model.Usuario"%>
+<%@page import="java.util.List"%>
 <%
     // 1. Lógica para obtener el rol y la página a incluir
     Usuario usuario = (Usuario) session.getAttribute("usuario");

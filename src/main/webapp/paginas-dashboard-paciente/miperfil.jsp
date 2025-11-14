@@ -1,6 +1,6 @@
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="com.dental.app.clinicadentalapp.model.Paciente"%>
-<%@page import="com.dental.app.clinicadentalapp.dao.PacienteDAO"%>
+<%@page import="com.dental.app.clinicadentalapp.PacienteDAO"%>
 <%@page import="com.dental.app.clinicadentalapp.model.Usuario"%>
 <%@page import="java.util.List"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
