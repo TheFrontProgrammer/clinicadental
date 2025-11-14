@@ -1,0 +1,16 @@
+# Archivos generados por Maven
+/target/
+*.war
+*.jar
+
+# Archivos generados por el IDE (NetBeans)
+nb-configuration.xml
+/nbactions.xml
+/nbproject/
+
+# Archivos de log
+*.log
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db

@@ -1,0 +1,260 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+    --patient-bg: #F5F7FA;
+    --patient-card-bg: #FFFFFF;
+    --patient-primary-blue: #4F63D7;
+    --patient-dark-text: #2D3748;
+    --patient-light-text: #A0AEC0;
+    --patient-accent-green: #38A169;
+    --patient-accent-red: #E53E3E;
+    --patient-accent-blue: #4299E1;
+    --patient-border-color: #E2E8F0;
+    --patient-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.paciente-view-body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--patient-bg);
+    color: var(--patient-dark-text);
+}
+
+.patient-portal-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Header del Paciente */
+.patient-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem 2.5rem;
+    background-color: var(--patient-card-bg);
+    border-bottom: 1px solid var(--patient-border-color);
+    flex-shrink: 0;
+}
+
+.patient-logo {
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--patient-primary-blue);
+    margin-right: 3rem;
+}
+
+.patient-main-nav {
+    display: flex;
+    gap: 2rem;
+    margin: 0 auto;
+}
+
+.patient-main-nav a {
+    text-decoration: none;
+    color: var(--patient-light-text);
+    font-weight: 500;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.patient-main-nav a:hover {
+    color: var(--patient-dark-text);
+}
+
+.patient-main-nav a.active {
+    color: var(--patient-primary-blue);
+    border-bottom-color: var(--patient-primary-blue);
+}
+
+.patient-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.patient-user-profile i {
+    font-size: 1.2rem;
+    color: var(--patient-light-text);
+}
+
+/* Contenido Principal del Paciente */
+.patient-content-area {
+    padding: 2.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Estilos para Tarjetas genéricas */
+.card-shadow {
+    background-color: var(--patient-card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--patient-shadow);
+}
+
+/* Estilos específicos de inicio.jsp */
+.welcome-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.welcome-subtitle {
+    color: var(--patient-light-text);
+    margin-bottom: 2rem;
+}
+
+.patient-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 1.5rem;
+}
+
+.ascenso-card { grid-row: 1 / 3; grid-column: 1 / 2; }
+.right-column { display: flex; flex-direction: column; gap: 1.5rem; }
+.conexion-social-card { grid-column: 1 / 2; }
+.accesos-rapidos-card { grid-column: 2 / 3; }
+
+.ascenso-card h3, .right-column h4, .conexion-social-card h4, .accesos-rapidos-card h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.progreso-container { display: flex; gap: 2rem; align-items: center; }
+.progreso-circular {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: conic-gradient(var(--patient-primary-blue) calc(var(--progreso) * 3.6deg), var(--patient-border-color) 0deg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+.progreso-circular .inner-circle {
+    width: 120px;
+    height: 120px;
+    background: var(--patient-card-bg);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: 600;
+}
+.tareas-list p {
+    font-weight: 500;
+    color: var(--patient-light-text);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+.tarea-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    background-color: #F7FAFC;
+    border: 1px solid #EDF2F7;
+}
+.tarea-item.done {
+    background-color: #E8F5E9;
+    border-color: #C8E6C9;
+}
+.tarea-item.done i.fa-check-circle { color: var(--patient-accent-green); }
+.tarea-item i:first-child { font-size: 1.2rem; color: var(--patient-primary-blue); }
+.tarea-icons { margin-left: auto; display: flex; gap: 0.5rem; color: var(--patient-light-text); }
+
+.proxima-cita-card .cita-details { display: flex; align-items: center; gap: 1rem; }
+.cita-fecha {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background-color: var(--patient-primary-blue);
+    color: white; border-radius: 12px; width: 60px; height: 60px; font-weight: 600; line-height: 1;
+}
+.cita-fecha span { font-size: 1.5rem; }
+.cita-info { display: flex; flex-direction: column; }
+.cita-info strong { font-weight: 600; }
+.cita-info span { color: var(--patient-light-text); font-size: 0.9rem; }
+.arrow-link { margin-left: auto; font-size: 1.2rem; color: var(--patient-light-text); }
+
+.stats-card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center; }
+.stat-card { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.stat-card .icon-verde, .stat-card .icon-rojo, .stat-card .icon-azul {
+    font-size: 1.5rem; width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; color: white;
+}
+.icon-verde { background-color: var(--patient-accent-green); }
+.icon-rojo { background-color: var(--patient-accent-red); }
+.icon-azul { background-color: var(--patient-accent-blue); }
+.stat-card strong { font-size: 1.5rem; font-weight: 600; }
+.stat-card span { font-size: 0.85rem; color: var(--patient-light-text); }
+
+.conexion-social-card {
+    background-color: var(--patient-dark-text);
+    color: #E2E8F0;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem;
+}
+.conexion-social-card i { font-size: 1.5rem; color: var(--patient-accent-blue); }
+.conexion-social-card h4 { color: white; }
+
+.accesos-rapidos-card .accesos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.acceso-item {
+    background-color: var(--patient-bg); padding: 1rem; border-radius: 12px; text-decoration: none;
+    color: var(--patient-dark-text); font-weight: 600; display: flex; align-items: center; gap: 0.75rem;
+    transition: background-color 0.2s;
+}
+.acceso-item:hover { background-color: #E2E8F0; }
+.acceso-item i { color: var(--patient-primary-blue); font-size: 1.2rem; }
+
+/* Estilos para citas.jsp (Mis Citas) */
+.mis-citas-container { max-width: 900px; margin: 0 auto; }
+.citas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.citas-header h1 { font-size: 2rem; font-weight: 700; }
+.btn-primary-citas {
+    background-color: var(--patient-primary-blue); color: white; padding: 0.75rem 1.5rem;
+    border-radius: 8px; text-decoration: none; font-weight: 600; transition: background-color 0.2s;
+}
+.btn-primary-citas:hover { background-color: #3C50B2; }
+
+.citas-section h2 { font-size: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--patient-border-color); }
+.timeline { position: relative; padding-left: 35px; }
+.timeline::before {
+    content: ''; position: absolute; left: 8px; top: 10px; bottom: 10px; width: 2px; background-color: var(--patient-border-color);
+}
+.timeline-item { position: relative; margin-bottom: 1.5rem; }
+.timeline-point {
+    position: absolute; left: -35px; top: 24px; width: 18px; height: 18px;
+    border-radius: 50%; background-color: var(--patient-bg); border: 3px solid var(--patient-light-text);
+}
+.timeline-item.active .timeline-point { border-color: var(--patient-primary-blue); }
+.timeline-card { background: var(--patient-card-bg); border: 1px solid var(--patient-border-color); border-radius: 12px; padding: 1.25rem 1.5rem; }
+.timeline-card-header { display: flex; align-items: center; gap: 1.5rem; }
+.fecha-box { text-align: center; font-weight: 600; color: var(--patient-dark-text); line-height: 1.2; }
+.fecha-box .dia { font-size: 1.8rem; }
+.fecha-box .mes-ano { font-size: 0.8rem; color: var(--patient-light-text); }
+.info-doctor strong { display: block; font-weight: 600; }
+.info-doctor span { color: var(--patient-light-text); font-size: 0.9rem; }
+.timeline-card-header .fa-chevron-down { margin-left: auto; color: var(--patient-light-text); }
+.timeline-card-body {
+    padding-top: 1rem; margin-top: 1rem; border-top: 1px solid var(--patient-border-color);
+    color: var(--patient-primary-blue); font-weight: 500;
+}
+.timeline-card-body i { margin-right: 0.5rem; }
+.no-citas-msg { color: var(--patient-light-text); }
